@@ -1,0 +1,10 @@
+[package]
+name = "kvapi-macros-internals"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+convert_case = "0.6.0"
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true

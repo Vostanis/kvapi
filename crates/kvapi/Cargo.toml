@@ -1,0 +1,21 @@
+[package]
+name = "kvapi"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+dotenv.workspace = true
+kvapi-macros = { version = "0.1.0", path = "../kvapi-macros" }
+kvapi-macros-internals = { version = "0.1.0", path = "../kvapi-macros-internals" }
+quote.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+quote = "1.0"
+syn = "2.0"
+proc-macro2 = "1.0"
+chrono = "0.4.38"

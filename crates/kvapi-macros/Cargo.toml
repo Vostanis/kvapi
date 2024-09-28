@@ -1,0 +1,15 @@
+[package]
+name = "kvapi-macros"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+anyhow.workspace = true
+convert_case.workspace = true
+kvapi-macros-internals = { version = "0.1.0", path = "../kvapi-macros-internals" }
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
