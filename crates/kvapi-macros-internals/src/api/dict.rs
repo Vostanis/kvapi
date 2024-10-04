@@ -1,7 +1,7 @@
 use super::common::{file_types, Separator};
-use proc_macro2::TokenStream;
+use super::node::Node;
 use quote::quote;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use syn::{
     braced, bracketed,
     parse::{Parse, ParseStream},
@@ -20,44 +20,6 @@ use syn::{
 #[derive(Debug)]
 pub struct Dict {
     pub inner: HashMap<String, Node>,
-}
-
-/// Nodes are the segments of the key in `"key": EndpointType` in a Dict Entry
-///
-/// e.g.,
-///     "path/to/endpoint": MyType,
-///
-/// path: Path                              <- root
-///         |_ to: To                       <- child of `path`
-///                 |_ endpoint: Endpoint   <- leaf & child of `to`
-///
-///                    impl Endpoint {
-///                         async fn get() -> Result<MyType> { ... }
-///                    }
-///
-/// The struct build of this would result in:
-/// `SomeApiName.path.to.endpoint.get()`
-///
-/// note1:  `endpoint`, being a leaf node, gets access to the `get()` function.
-/// note2:  each struct will have a `new()` impl.
-#[derive(Debug)]
-pub struct Node {
-    pub root: bool,                     // add to the Root fields
-    pub de_type: Option<TokenStream>,   // type of the `get()` result; if none, no `get()` needed
-    pub children: HashSet<String>,      // determines `new()` tokens
-    pub endpoint: Option<TokenStream>,  // if leaf node, remember the original endpoint for `url()` 
-                                        // (and any additional query)
-}
-
-impl Node {
-    fn new() -> Self {
-        Self {
-            root: false,
-            de_type: None,
-            children: HashSet::new(),
-            endpoint: None,
-        }
-    }
 }
 
 impl Parse for Dict {
@@ -99,26 +61,20 @@ impl Parse for Dict {
                 // remember: each node will need a `new()` impl, so child nodes will be used in building those TokenStreams, also.
                 if i == last {
                     let endpoint = entry.endpoint.clone();
-                    let query = entry
-                        .query
-                        .clone();
+                    let query = entry.query.clone();
 
                     // since we don't have the `base` url yet, take a segment of the eventual TokenStream (stringified for easy storage).
                     // if there is Some(query), then append it now, otherwise, just include the original.
                     //
                     // also, include the type.
                     if let Some(query) = query {
-                        node.endpoint = Some(
-                            quote! {
-                                let url = format!("{}{}", #endpoint, #query);
-                            }
-                        )
+                        node.endpoint = Some(quote! {
+                            let url = format!("{}{}", #endpoint, #query);
+                        })
                     } else {
-                        node.endpoint = Some(
-                            quote! {
-                                let url = #endpoint;
-                            }
-                        )
+                        node.endpoint = Some(quote! {
+                            let url = String::from(#endpoint);
+                        })
                     };
 
                     let de_type = entry.de_type.clone();
@@ -145,10 +101,8 @@ impl Parse for Dict {
 /// Parse a single Record of a Dict - this includes: endpoint, type, queries, and rename.
 ///
 /// ```rust
-/// dict: {
-///    #[query: "/append/this/string", rename: "rename_to_this"]
-///    "my_endpoint": MyType,
-/// }
+/// #[query: "/append/this/string", rename: "rename_to_this"]
+/// "my_endpoint": MyType,
 /// ```
 pub struct Entry {
     pub endpoint: String,
@@ -251,4 +205,3 @@ impl Parse for Attr {
         Ok(Attr { fn_id, arg })
     }
 }
-

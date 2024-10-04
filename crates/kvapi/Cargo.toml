@@ -5,6 +5,7 @@ edition.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+chrono = "0.4.38"
 dotenv.workspace = true
 kvapi-macros = { version = "0.1.0", path = "../kvapi-macros" }
 kvapi-macros-internals = { version = "0.1.0", path = "../kvapi-macros-internals" }
@@ -19,3 +20,8 @@ quote = "1.0"
 syn = "2.0"
 proc-macro2 = "1.0"
 chrono = "0.4.38"
+hmac = "0.12.1"
+sha2 = "0.10.8"
+hex-literal = "0.4.1"
+base64 = "0.22.1"
+criterion = "0.5.1"

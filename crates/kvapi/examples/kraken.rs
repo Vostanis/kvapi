@@ -10,7 +10,7 @@ use serde_json::Value;
 //      >> "https://docs.kraken.com/api/docs/rest-api/get-server-time"
 kvapi::api! {
     name:       Kraken
-    base:       "https://api.kraken.com/0/"
+    base:       "https://api.kraken.com/0/public/"
     headers:    {
                     // API-Key HTTP header parameter: the public key from your API key-pair
                     "API-Key": &var("KRAKEN_API").expect("failed to find KRAKEN_API env. var.")
@@ -24,7 +24,10 @@ kvapi::api! {
                 }
 
     dict:       {
-                    #[rename: "time"] "public/Time": Value,
+                    "Time": Value,
+
+                    #[rename: "btc", query: "?pair=BTCUSDT&interval=1440"]
+                    "OHLC": Value,
                 }
 }
 
@@ -36,6 +39,7 @@ async fn main() -> anyhow::Result<()> {
 
     let kraken = Kraken::new();
     println!("{:#?}", kraken.time.get().await?);
+    println!("{:#?}", kraken.btc.get().await?);
 
     Ok(())
 }

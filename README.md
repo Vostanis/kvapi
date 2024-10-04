@@ -1,4 +1,5 @@
 # Intro
+
 `kvapi` is all about shortcuts for working with APIs in **rust**;
 the procedural macro `api!` provides a framework for working with RESTful APIs.
 
@@ -9,6 +10,8 @@ Below is an example of a single endpoint from the **SEC (Security Exchange Commi
 It simply returns the endpoint: "https://www.sec.gov/files/company_tickers.json", paired with a Deserializable type, `CompanyTickers`.
 
 It also uses the Environment Variable "USER_AGENT", loading it with the [dotenv] crate from a .env file.
+
+[dotenv]: https://docs.rs/dotenv/latest/dotenv/
 
 ```rust
 
@@ -37,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
     let sec = Sec::new();
     let tickers = sec.company_tickers.get().await?;
     //                      ^^^
-    //          the dict entry 
+    //          the dict entry becomes a field
     println!("{:#?}", tickers.entries);
     Ok(())
 }
@@ -45,6 +48,8 @@ async fn main() -> anyhow::Result<()> {
 ```
 
 This draws a Deserializable type from the below file, where the [serde] crate is used in defining our schema.
+
+[serde]: https://docs.rs/serde/latest/serde/
 
 ```rust
 
@@ -77,6 +82,3 @@ impl<'de> Deserialize<'de> for CompanyTickers {
 }
 
 ```
-
-[dotenv]: https://docs.rs/dotenv/latest/dotenv/
-[serde]: https://docs.rs/serde/latest/serde/

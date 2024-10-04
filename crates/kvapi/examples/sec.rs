@@ -2,16 +2,18 @@ mod schema;
 
 use dotenv::{dotenv, var};
 use kvapi::api;
-use schema::sec::CompanyTickers;
+use schema::sec::Tickers;
 
-// API Documentation: "https://www.sec.gov/search-filings/edgar-application-programming-interfaces"
+// A very simple example of the SEC's EDGAR API, in which we simply return the list of company tickers.
+// The `schema::sec` module is used to intricately define exact `serde` Deserialization for the JSON.
+// (It might shed some light on how to optimise `serde`, as well.)
+//
+// API Documentation: https://www.sec.gov/search-filings/edgar-application-programming-interfaces
 api! {
-    name:       Sec
-    base:       "https://www.sec.gov/files/"
-    headers:    { "User-Agent": &var("USER_AGENT").expect("failed to get User-Agent") }
-    dict:       {
-                    "company_tickers.json": CompanyTickers,
-                }
+    name: Sec
+    base: "https://www.sec.gov/files/"
+    head: { "User-Agent": &var("USER_AGENT")? }
+    dict: { "company_tickers.json" -> Tickers }
 }
 
 #[tokio::main]
@@ -20,6 +22,7 @@ async fn main() -> anyhow::Result<()> {
 
     let sec = Sec::new();
     let tickers = sec.company_tickers.get().await?;
-    println!("{:#?}", tickers.entries);
+    println!("{:#?}", tickers.0);
+
     Ok(())
 }

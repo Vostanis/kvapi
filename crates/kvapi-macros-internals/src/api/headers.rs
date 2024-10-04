@@ -9,11 +9,13 @@ use syn::{
 
 /// Collection of all headers for a HTTP client.
 ///
+/// ```rust
 /// {
 ///    "Header Name": "Header Value"
-///    "AnotherHeader": &std::env::var("ENV_HEADER")
+///    "AnotherHeader": &std::env::var("ENV_HEADER")?
 /// }
-#[derive(Debug)]
+/// ```
+#[derive(Clone, Debug)]
 pub struct Headers {
     pub inner: Vec<TokenStream>,
 }

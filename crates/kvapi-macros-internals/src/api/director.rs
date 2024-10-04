@@ -1,27 +1,24 @@
-use super::{headers::Headers, Input};
-use convert_case::{
-    Case::{Pascal, Snake},
-    Casing,
-};
+use super::{headers::Headers, Builder};
+use convert_case::Case::{Pascal, Snake};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-pub struct ApiComponents {
+pub struct Api {
     pub root_fields: Vec<TokenStream>,
     pub other_nodes: Vec<TokenStream>,
 }
 
-impl ApiComponents {
-    pub fn build(input: Input) -> Self {
+impl Api {
+    pub fn build(builder: Builder) -> Self {
         let mut api = Self {
             root_fields: vec![],
             other_nodes: vec![],
         };
 
-        let headers = input.headers.unwrap_or(Headers { inner: vec![] }).inner;
+        let headers = builder.headers.unwrap_or(Headers { inner: vec![] }).inner;
 
         // loop all the nodes from the input and build the TokenStreams
-        for (field, node) in input.dict.inner {
+        for (field, node) in builder.dict.unwrap().inner {
             let (snake, pascal) = (
                 format_ident!("{}", field.to_case(Snake)),
                 format_ident!("__{}", field.to_case(Pascal)),
@@ -47,23 +44,6 @@ impl ApiComponents {
                     quote! { #c_snake: #c_pascal, }
                 })
                 .collect();
-
-            // all nodes will need a `new()` impl, using the children above.
-            // if `children` is empty, then it's just an empty function,
-            // but we make it, regardless.
-            // api.other_nodes.push(quote! {
-            //     pub struct #pascal {
-            //         #( #children, )*
-            //     }
-
-            //     impl #pascal {
-            //         fn new() -> Self {
-            //             Self {
-            //                 #( #children::new(), )*
-            //             }
-            //         }
-            //     }
-            // });
 
             // >> is it a leaf node?
             // it will have a Type if it is.
@@ -92,7 +72,7 @@ impl ApiComponents {
                 Some(de_type) => {
                     // unpack the url, dependent on the `base` variable.
                     let endpoint = node.endpoint.unwrap();
-                    let url = if let Some(ref base) = input.base {
+                    let url = if let Some(ref base) = builder.base {
                         quote! {
                             let base = #base;
                             #endpoint
@@ -104,7 +84,7 @@ impl ApiComponents {
                         }
                     };
 
-                    let url = if let Some(ref query) = input.query {
+                    let url = if let Some(ref query) = builder.query {
                         quote! {
                             #url
                             let url = format!("{}{}", url, #query);
@@ -188,81 +168,8 @@ impl ApiComponents {
                             }
                         }
                     });
-
-                    // // if #[debug] included, add DebugHttpClient trait
-                    // if debug {
-                    //     api.other_nodes.push(quote! {
-                    //         impl kvapi::DebugHttpClient for #pascal {}
-                    //     });
-                    // }
                 }
             }
-
-            // >> is it a leaf node?
-            // it will have a Type if it is.
-            //
-            // if so, it needs a collection of HTTP-related functions, like `get()`.
-            // if not, we can just ignore it.
-            // if let Some(de_type) = node.de_type {
-            //     // unpack the url, dependent on the `base` variable.
-            //     let endpoint = node.endpoint.unwrap();
-            //     let url = if let Some(ref base) = input.base {
-            //         quote! {
-            //             let base = #base;
-            //             #endpoint
-            //             let url = format!("{}{}", base, url);
-            //         }
-            //     } else {
-            //         quote! {
-            //             #endpoint
-            //         }
-            //     };
-
-            //     let url = if let Some(ref query) = input.query {
-            //         quote! {
-            //             #url
-            //             let url = format!("{}{}", url, #query);
-            //         }
-            //     } else {
-            //         url
-            //     };
-
-            //     let url = quote! {
-            //         #url
-            //         url
-            //     };
-
-            //     // push the HTTP impl collection
-            //     api.other_nodes.push(quote! {
-            //         impl #pascal {
-            //             pub fn url() -> String {
-            //                 #url
-            //             }
-            //             pub fn dbg_url(&self) -> () {
-            //                 println!("{}", Self::url())
-            //             }
-            //             pub fn client() -> Result<reqwest::Client, reqwest::Error> {
-            //                 let mut headers = reqwest::header::HeaderMap::new();
-            //                 #( #headers )*
-            //                 reqwest::ClientBuilder::new()
-            //                     .default_headers(headers)
-            //                     .build()
-            //             }
-            //             pub fn dbg_client(&self) -> () {
-            //                 println!("{:#?}", Self::client())
-            //             }
-            //             pub async fn get(&self) -> Result<#de_type, reqwest::Error> {
-            //                 let response = Self::client()?
-            //                     .get(Self::url())
-            //                     .send()
-            //                     .await?
-            //                     .json::<#de_type>()
-            //                     .await?;
-            //                 Ok(response)
-            //             }
-            //         }
-            //     });
-            // }
         }
 
         api

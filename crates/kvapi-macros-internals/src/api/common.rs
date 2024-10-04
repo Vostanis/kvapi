@@ -32,7 +32,6 @@ impl Parse for Separator {
     }
 }
 
-
 /// Remember the file types to ignore when parsing the endpoint.
 pub fn file_types() -> HashSet<&'static str> {
     let mut set: HashSet<&str> = HashSet::new();
