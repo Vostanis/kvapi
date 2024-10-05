@@ -83,12 +83,17 @@ impl Node {
     // build the HTTP functions
     pub(crate) fn build_http(&self, url: TokenStream, headers: Option<Headers>) -> TokenStream {
         let de_type = self.de_type.clone().unwrap();
-        let headers = headers.unwrap_or(Headers { inner: vec![] }).inner;
+        let headers = headers.unwrap_or(Headers {
+            client: vec![],
+            query: vec![],
+        });
+        let client_headers = headers.client;
+        let query_headers = headers.query;
 
         let http_methods = quote! {
             fn build_client() -> anyhow::Result<reqwest::Client> {
                 let mut headers = reqwest::header::HeaderMap::new();
-                #( #headers )*
+                #( #client_headers )*
                 let client = reqwest::ClientBuilder::new()
                     .default_headers(headers)
                     .build()?;
@@ -112,6 +117,7 @@ impl Node {
                 let response: #de_type = self
                     .client()
                     .get(self.url())
+                    #( #query_headers )*
                     .send()
                     .await?
                     .json()

@@ -60,7 +60,7 @@ impl ApiBuilder {
                     pub struct #pascal {
                         client: reqwest::Client,
                         url: String,
-                        #( #fields, )*
+                        #( pub #fields, )*
                     }
                     impl #pascal {
                         pub fn new() -> Self {
@@ -79,7 +79,7 @@ impl ApiBuilder {
                 // non-http node
                 let node = quote! {
                     pub struct #pascal {
-                        #( #fields, )*
+                        #( pub #fields, )*
                     }
 
                     impl #pascal {
@@ -97,7 +97,7 @@ impl ApiBuilder {
         // return the final TokenStream
         quote! {
             pub struct #api_name {
-                #( #fields, )*
+                #( pub #fields, )*
             }
             impl #api_name {
                 pub fn new() -> Self {
