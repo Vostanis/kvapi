@@ -12,16 +12,8 @@ use schema::sec::Tickers;
 api! {
     name: Sec
     base: "https://www.sec.gov/files/"
-    head: {
-        "User-Agent": &var("USER_AGENT")?
-        #[query] "custom": &my_func()
-    }
+    head: { "User-Agent": &var("USER_AGENT")? }
     dict: { "company_tickers.json" -> Tickers }
-}
-
-#[allow(dead_code)]
-fn my_func() -> String {
-    "kimonvostanis@gmail.com".to_string()
 }
 
 #[tokio::main]

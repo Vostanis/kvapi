@@ -55,7 +55,7 @@ impl Parse for Headers {
                     client_headers.push(quote! {
                         // client query
                         let value = #value;
-                        headers.insert(#key, reqwest::header::HeaderValue::from_str(value).unwrap());
+                        headers.insert(#key, kvapi::HeaderValue::from_str(value).unwrap());
                     });
                 }
             })

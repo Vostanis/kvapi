@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
 // {
+//     "timestamp": 3987128312,
 //     "categories": [
 //         {
 //             "id": 125,
@@ -8,6 +9,7 @@ use serde::Deserialize;
 //             "parent_id": 13
 //         }
 //     ]
+//     "error": []
 // }
 #[derive(Debug, Deserialize)]
 pub struct Categories {

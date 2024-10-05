@@ -58,7 +58,7 @@ impl ApiBuilder {
                 // http node
                 let node = quote! {
                     pub struct #pascal {
-                        client: reqwest::Client,
+                        client: kvapi::Client,
                         url: String,
                         #( pub #fields, )*
                     }

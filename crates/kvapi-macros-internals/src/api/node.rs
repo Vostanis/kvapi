@@ -91,10 +91,10 @@ impl Node {
         let query_headers = headers.query;
 
         let http_methods = quote! {
-            fn build_client() -> anyhow::Result<reqwest::Client> {
-                let mut headers = reqwest::header::HeaderMap::new();
+            fn build_client() -> kvapi::Result<kvapi::Client> {
+                let mut headers = kvapi::HeaderMap::new();
                 #( #client_headers )*
-                let client = reqwest::ClientBuilder::new()
+                let client = kvapi::ClientBuilder::new()
                     .default_headers(headers)
                     .build()?;
                 Ok(client)
@@ -109,11 +109,11 @@ impl Node {
                 &self.url
             }
 
-            fn client(&self) -> &reqwest::Client {
+            fn client(&self) -> &kvapi::Client {
                 &self.client
             }
 
-            pub async fn get(&self) -> reqwest::Result<#de_type> {
+            pub async fn get(&self) -> kvapi::Result<#de_type> {
                 let response: #de_type = self
                     .client()
                     .get(self.url())
@@ -125,7 +125,7 @@ impl Node {
                 Ok(response)
             }
 
-            pub async fn post(&self, json: serde_json::Value) -> reqwest::Result<#de_type> {
+            pub async fn post(&self, json: kvapi::Value) -> kvapi::Result<#de_type> {
                 let response: #de_type = self
                     .client()
                     .post(self.url())
